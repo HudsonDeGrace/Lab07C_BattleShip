@@ -5,7 +5,7 @@ public class BSBoard {
 
     private static final BSBoard INSTANCE = new BSBoard();
     private BSBoard() {
-        resetBoard();
+        createBoard();
     }
 
     public BSTile[][] getBoard(){
@@ -16,7 +16,7 @@ public class BSBoard {
         return INSTANCE;
     }
 
-    public void resetBoard(){
+    public void createBoard(){
         for(int row = 0; row < board.length; row++) {
             for(int col = 0; col < board[row].length; col++) {
                 board[row][col] = new BSTile(row, col, false, true);
@@ -25,5 +25,17 @@ public class BSBoard {
                 board[row][col].setForeground(Color.CYAN);
             }
         }
+    }
+
+    public void resetBoard(){
+        for(int row = 0; row < board.length; row++) {
+            for(int col = 0; col < board[row].length; col++) {
+                INSTANCE.getBoard()[row][col].setText("~");
+                INSTANCE.getBoard()[row][col].setForeground(Color.CYAN);
+                INSTANCE.getBoard()[row][col].setIsHit(false);
+                INSTANCE.getBoard()[row][col].setIsEmpty(true);
+            }
+        }
+
     }
 }

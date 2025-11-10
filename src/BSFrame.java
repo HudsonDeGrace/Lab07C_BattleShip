@@ -10,6 +10,14 @@ public class BSFrame extends JFrame {
     JButton ResetBtn, QuitBtn;
 
     BSBoard bsBoard = BSBoard.getInstance();
+    BSTile[][] board = bsBoard.getBoard();
+    int miss = 0, hits = 0, strikes = 0, totalMiss = 0;
+
+    Ship ship1 = new Ship(5);
+    Ship ship2 = new Ship(4);
+    Ship ship3 = new Ship(3);
+    Ship ship4 = new Ship(3);
+    Ship ship5 = new Ship(2);
 
 
     public BSFrame() {
@@ -73,15 +81,15 @@ public class BSFrame extends JFrame {
     }
 
     private void createBSPnl() {
-        BSTile[][] board = bsBoard.getBoard();
-
         BSPnl = new JPanel();
         BSPnl.setLayout(new GridLayout(10, 10));
         for(BSTile[] row : board){
             for(BSTile tile : row){
                 BSPnl.add(tile);
+                tile.addActionListener(new buttonListener());
             }
         }
+        fillBoard();
 
         MainPnl.add(BSPnl, BorderLayout.CENTER);
     }
@@ -93,15 +101,81 @@ public class BSFrame extends JFrame {
         QuitBtn = new JButton("Quit");
         BtnPnl.add(ResetBtn);
         BtnPnl.add(QuitBtn);
-        QuitBtn.addActionListener(_ -> System.exit(0));
-        ResetBtn.addActionListener(_ -> bsBoard.resetBoard());
+        QuitBtn.addActionListener(e -> {
+            if(JOptionPane.showConfirmDialog(MainPnl,"Are you sure you want to quit?","Quit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) ==  JOptionPane.YES_OPTION){
+                System.exit(0);
+            }
+        });
+        ResetBtn.addActionListener(e -> {
+            if(JOptionPane.showConfirmDialog(MainPnl,"Are you sure you want to reset?","Reset", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) ==  JOptionPane.YES_OPTION) {
+                resetGame();
+            }
+        });
         SouthPnl.add(BtnPnl, BorderLayout.SOUTH);
     }
 
-//    class buttonListener implements ActionListener {
-//        @Override
-//        public void actionPerformed(ActionEvent e) {
-//            if(e.getSource() == ResetBtn){}
-//        }
-//    }
+    private void resetGame() {
+        bsBoard.resetBoard();
+        fillBoard();
+        miss = 0;
+        hits = 0;
+        totalMiss = 0;
+        strikes = 0;
+        MissTF.setText("");
+        StrikeTF.setText("");
+        TotalMissTF.setText("");
+        TotalHitTF.setText("");
+        for(BSTile[] row : board){
+            for(BSTile tile : row){
+                tile.addActionListener(new buttonListener());
+            }
+        }
+    }
+
+    private void fillBoard(){
+        ship1.placeShip();
+        ship2.placeShip();
+        ship3.placeShip();
+        ship4.placeShip();
+        ship5.placeShip();
+    }
+
+    class buttonListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            for(BSTile[] row : bsBoard.getBoard()){
+                for(BSTile tile : row){
+                    if(tile == e.getSource()){
+                        if(tile.getIsEmpty()){
+                            tile.setText("Miss");
+                            tile.setForeground(Color.BLACK);
+                            tile.removeActionListener(this);
+                            miss++;
+                            totalMiss++;
+                        }else{
+                            tile.setText("X");
+                            tile.setForeground(Color.RED);
+                            tile.removeActionListener(this);
+                            hits++;
+                        }
+                    }
+                }
+            }
+            if(miss==5){
+                strikes++;
+                miss = 0;
+            }
+            if(strikes == 3){
+                if(JOptionPane.showConfirmDialog(MainPnl, "You gained 3 strikes and lost! Would you like to try again?", "You Lose!", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+                    resetGame();
+                }else{
+                    System.exit(0);
+                }
+            }
+            MissTF.setText(String.valueOf(miss));
+            TotalMissTF.setText(String.valueOf(totalMiss));
+            StrikeTF.setText(String.valueOf(strikes));
+            TotalHitTF.setText(String.valueOf(hits));
+        }
+    }
 }

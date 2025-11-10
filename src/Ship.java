@@ -1,8 +1,8 @@
-import java.util.ArrayList;
 import java.util.Random;
 
 public class Ship {
     private int size;
+    int healthLeft = size;
 
     public Ship(int size) {
         this.size = size;
@@ -14,6 +14,13 @@ public class Ship {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    public int getHealthLeft() {
+        return healthLeft;
+    }
+    public void setHealthLeft(int healthLeft) {
+        this.healthLeft = healthLeft;
     }
 
     BSBoard bsBoard = BSBoard.getInstance();
@@ -54,21 +61,34 @@ public class Ship {
 
     public boolean checkEligibility(int startRow, int startCol, boolean isVertical){
         boolean eligible = false;
-        int[] rows = new int[size];
-        int[] cols = new int[size];
-        int[][] position =  new int[size][2];
+        int count = 0;
 
-        for(int i = 0; i < size; i++){
-            if(isVertical){
-                eligible = board[startRow + i][startCol].getIsEmpty();
-                rows[i] =  startRow + i;
-                cols[i] = startCol;
-            }else{
-                eligible = board[startRow][startCol + i].getIsEmpty();
-                rows[i] =  startRow;
-                cols[i] =  startCol + i;
+        if(isVertical){
+            for (int i = 0; i < size; i++) {
+                if(board[startRow + i][startCol].getIsEmpty()) {
+                    count++;
+                    if(count == size){
+                        eligible = true;
+                        for(int j = 0; j < size; j++){
+                            board[startRow + j][startCol].setIsEmpty(false);
+                        }
+                    }
+                }
+            }
+        }else{
+            for (int i = 0; i < size; i++) {
+                if(board[startRow][startCol + i].getIsEmpty()) {
+                    count++;
+                    if(count == size){
+                        eligible = true;
+                        for(int j = 0; j < size; j++){
+                            board[startRow][startCol + j].setIsEmpty(false);
+                        }
+                    }
+                }
             }
         }
+
         return eligible;
     }
 }
