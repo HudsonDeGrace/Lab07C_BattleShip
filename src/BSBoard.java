@@ -32,10 +32,8 @@ public class BSBoard {
             for(int col = 0; col < board[row].length; col++) {
                 INSTANCE.getBoard()[row][col].setText("~");
                 INSTANCE.getBoard()[row][col].setForeground(Color.CYAN);
-                INSTANCE.getBoard()[row][col].setIsHit(false);
                 INSTANCE.getBoard()[row][col].setIsEmpty(true);
             }
         }
-
     }
 }

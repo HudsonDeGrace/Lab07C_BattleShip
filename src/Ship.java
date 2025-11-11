@@ -2,25 +2,47 @@ import java.util.Random;
 
 public class Ship {
     private int size;
-    int healthLeft = size;
+    int healthLeft;
+    private boolean isVertical;
+    int startRow;
+    int startCol;
+    int endRow;
+    int endCol;
 
-    public Ship(int size) {
+    public Ship(int size, int healthLeft) {
         this.size = size;
+        this.healthLeft = healthLeft;
     }
 
-    public int getSize() {
+    public int getSize(){
         return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
     }
 
     public int getHealthLeft() {
         return healthLeft;
     }
     public void setHealthLeft(int healthLeft) {
-        this.healthLeft = healthLeft;
+        this.healthLeft =  healthLeft;
+    }
+
+    public boolean isVertical() {
+        return isVertical;
+    }
+
+    public int getStartRow() {
+        return startRow;
+    }
+
+    public int getStartCol() {
+        return startCol;
+    }
+
+    public int getEndRow() {
+        return endRow;
+    }
+
+    public int getEndCol() {
+        return endCol;
     }
 
     BSBoard bsBoard = BSBoard.getInstance();
@@ -29,31 +51,35 @@ public class Ship {
     public void placeShip(){
         boolean placed = false;
         Random gen = new Random();
+        healthLeft = size;
 
         // Determined if ship is placed vertically or horizontally
         // If true -> ship is placed vertically
-        if(gen.nextBoolean()){
+        isVertical = gen.nextBoolean();
+        if(isVertical){
             do {
-                int startRow = gen.nextInt(0, 11 - size);
-                int startCol = gen.nextInt(10);
-                if(checkEligibility(startRow, startCol, true)) {
+                startRow = gen.nextInt(0, 11 - size);
+                startCol = gen.nextInt(10);
+                if(checkEligibility(startRow, startCol, isVertical)) {
                     placed = true;
                     for(int i = 0; i < size; i++){
                         board[startRow + i][startCol].setIsEmpty(false);
-                        board[startRow + i][startCol].setText("Ship");
                     }
+                    endRow = startRow + size;
+                    endCol = startCol;
                 }
             }while(!placed);
         }else{
             do {
-                int startRow = gen.nextInt(10);
-                int startCol = gen.nextInt(0, 11 - size);
+                startRow = gen.nextInt(10);
+                startCol = gen.nextInt(0, 11 - size);
                 if(checkEligibility(startRow, startCol, false)) {
                     placed = true;
                     for(int i = 0; i < size; i++){
                         board[startRow][startCol + i].setIsEmpty(false);
-                        board[startRow][startCol + i].setText("Ship");
                     }
+                    endRow = startRow;
+                    endCol = startCol + size;
                 }
             }while(!placed);
         }

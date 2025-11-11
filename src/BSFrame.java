@@ -13,11 +13,13 @@ public class BSFrame extends JFrame {
     BSTile[][] board = bsBoard.getBoard();
     int miss = 0, hits = 0, strikes = 0, totalMiss = 0;
 
-    Ship ship1 = new Ship(5);
-    Ship ship2 = new Ship(4);
-    Ship ship3 = new Ship(3);
-    Ship ship4 = new Ship(3);
-    Ship ship5 = new Ship(2);
+    Ship ship1 = new Ship(5, 5);
+    Ship ship2 = new Ship(4, 4);
+    Ship ship3 = new Ship(3, 3);
+    Ship ship4 = new Ship(3, 3);
+    Ship ship5 = new Ship(2, 2);
+
+    int shipsLeft = 5;
 
 
     public BSFrame() {
@@ -101,12 +103,12 @@ public class BSFrame extends JFrame {
         QuitBtn = new JButton("Quit");
         BtnPnl.add(ResetBtn);
         BtnPnl.add(QuitBtn);
-        QuitBtn.addActionListener(e -> {
+        QuitBtn.addActionListener(_ -> {
             if(JOptionPane.showConfirmDialog(MainPnl,"Are you sure you want to quit?","Quit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) ==  JOptionPane.YES_OPTION){
                 System.exit(0);
             }
         });
-        ResetBtn.addActionListener(e -> {
+        ResetBtn.addActionListener(_ -> {
             if(JOptionPane.showConfirmDialog(MainPnl,"Are you sure you want to reset?","Reset", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) ==  JOptionPane.YES_OPTION) {
                 resetGame();
             }
@@ -117,6 +119,7 @@ public class BSFrame extends JFrame {
     private void resetGame() {
         bsBoard.resetBoard();
         fillBoard();
+        shipsLeft = 5;
         miss = 0;
         hits = 0;
         totalMiss = 0;
@@ -127,7 +130,10 @@ public class BSFrame extends JFrame {
         TotalHitTF.setText("");
         for(BSTile[] row : board){
             for(BSTile tile : row){
-                tile.addActionListener(new buttonListener());
+                if(tile.getIsHit()){
+                    tile.addActionListener(new buttonListener());
+                    tile.setIsHit(false);
+                }
             }
         }
     }
@@ -140,6 +146,31 @@ public class BSFrame extends JFrame {
         ship5.placeShip();
     }
 
+    boolean onTile(int row, int col, Ship ship){
+        if((row >= ship.getStartRow() && row <= ship.getEndRow()) && (col >= ship.getStartCol() && col <= ship.getEndCol())){
+            ship.setHealthLeft(ship.getHealthLeft() - 1);
+            System.out.println(ship.getHealthLeft());
+            return true;
+        }
+        return false;
+    }
+
+    Ship getShip(int row, int col){
+        Ship ret = null;
+        if(onTile(row, col, ship1)){
+            ret = ship1;
+        }else if(onTile(row, col, ship2)){
+            ret = ship2;
+        }else if(onTile(row, col, ship3)){
+            ret = ship3;
+        }else if(onTile(row, col, ship4)){
+            ret = ship4;
+        }else if(onTile(row, col, ship5)){
+            ret = ship5;
+        }
+        return ret;
+    }
+
     class buttonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -147,21 +178,37 @@ public class BSFrame extends JFrame {
                 for(BSTile tile : row){
                     if(tile == e.getSource()){
                         if(tile.getIsEmpty()){
-                            tile.setText("Miss");
-                            tile.setForeground(Color.BLACK);
+                            tile.setText("M");
+                            tile.setForeground(Color.YELLOW);
+                            tile.setIsHit(true);
                             tile.removeActionListener(this);
                             miss++;
                             totalMiss++;
                         }else{
                             tile.setText("X");
                             tile.setForeground(Color.RED);
+                            tile.setIsHit(true);
                             tile.removeActionListener(this);
+                            miss = 0;
                             hits++;
+
+                            if(getShip(tile.getRow(), tile.getCol()).getHealthLeft() == 0){
+                                shipsLeft--;
+                                System.out.println("Ships left " + shipsLeft);
+                                if(shipsLeft == 0){
+                                    if(JOptionPane.showConfirmDialog(MainPnl,"You win! Do you want to play again?", "You Win!",  JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) ==  JOptionPane.YES_OPTION){
+                                        shipsLeft = 5;
+                                        resetGame();
+                                    }
+                                }else{
+                                    JOptionPane.showMessageDialog(MainPnl, "You sunk a ship!", "Ship Sunk", JOptionPane.INFORMATION_MESSAGE);
+                                }
+                            }
                         }
                     }
                 }
             }
-            if(miss==5){
+            if(miss == 5){
                 strikes++;
                 miss = 0;
             }
